@@ -3,7 +3,6 @@ let gameState = {
     age: 0,
     stats: { health: 50, intelligence: 50, charm: 50, wealth: 50, mood: 50 },
     talents: [],
-    freePoints: 0,
     isRunning: false,
     isPaused: false,
     speed: 1,
@@ -11,7 +10,6 @@ let gameState = {
     usedEvents: new Set(),
     conditionTriggered: new Set(),
     achievements: [],
-    milestones: [],
     healthEverLow: false,
     wealthEverLow: false
 };
@@ -96,7 +94,7 @@ function getSliderValues() {
 function getFreePointsBonus() {
     let bonus = 0;
     selectedTalents.forEach(id => {
-        const talent = TALENTS.find(t => t.id === id);
+        const talent = TALENTS_POOL.find(t => t.id === id);
         if (talent && talent.freePoints) {
             bonus += talent.freePoints;
         }
@@ -104,38 +102,61 @@ function getFreePointsBonus() {
     return bonus;
 }
 
-// ============ 天赋选择 ============
+// ============ 天赋选择（随机生成10条） ============
 let selectedTalents = [];
+let currentTalentOptions = [];
 const MAX_TALENTS = 3;
+const TALENT_OPTIONS_COUNT = 10;
+
+// 随机生成10条天赋
+function generateRandomTalents() {
+    selectedTalents = [];
+    el.talentCount.textContent = '0';
+
+    // 随机打乱天赋池，取前10条
+    const shuffled = [...TALENTS_POOL].sort(() => Math.random() - 0.5);
+    currentTalentOptions = shuffled.slice(0, TALENT_OPTIONS_COUNT);
+
+    renderTalents();
+}
 
 function renderTalents() {
     el.talentGrid.innerHTML = '';
-    const categories = ['basic', 'points', 'condition', 'passive', 'special'];
 
-    categories.forEach(cat => {
-        const catTalents = TALENTS.filter(t => t.category === cat);
-        if (catTalents.length === 0) return;
+    // 刷新按钮
+    const refreshBtn = document.createElement('div');
+    refreshBtn.className = 'talent-refresh-btn';
+    refreshBtn.innerHTML = '🔄 换一批天赋';
+    refreshBtn.onclick = generateRandomTalents;
+    el.talentGrid.appendChild(refreshBtn);
 
-        const header = document.createElement('div');
-        header.className = 'talent-category-header';
-        header.textContent = getCategoryName(cat);
-        header.style.gridColumn = '1 / -1';
-        el.talentGrid.appendChild(header);
+    // 渲染10条随机天赋
+    currentTalentOptions.forEach(talent => {
+        const card = document.createElement('div');
+        card.className = 'talent-card';
+        if (selectedTalents.includes(talent.id)) card.classList.add('selected');
+        const canSelect = selectedTalents.length < MAX_TALENTS || selectedTalents.includes(talent.id);
 
-        catTalents.forEach(talent => {
-            const card = document.createElement('div');
-            card.className = 'talent-card';
-            if (selectedTalents.includes(talent.id)) card.classList.add('selected');
-            const canSelect = selectedTalents.length < MAX_TALENTS || selectedTalents.includes(talent.id);
+        // 分类标签颜色
+        const categoryColors = {
+            basic: '#667eea',
+            points: '#f59e0b',
+            condition: '#10b981',
+            passive: '#8b5cf6',
+            special: '#ef4444'
+        };
+        const categoryColor = categoryColors[talent.category] || '#718096';
 
-            card.innerHTML = `
-                <div class="talent-icon">${talent.icon}</div>
-                <div class="talent-name">${talent.name}</div>
-                <div class="talent-desc">${talent.desc}</div>
-            `;
-            card.onclick = () => toggleTalent(talent.id, canSelect);
-            el.talentGrid.appendChild(card);
-        });
+        card.innerHTML = `
+            <div class="talent-icon">${talent.icon}</div>
+            <div class="talent-name">${talent.name}</div>
+            <div class="talent-desc">${talent.desc}</div>
+            <div class="talent-tag" style="background:${categoryColor}20;color:${categoryColor};font-size:0.7em;margin-top:4px;padding:2px 6px;border-radius:8px;display:inline-block">
+                ${getCategoryName(talent.category)}
+            </div>
+        `;
+        card.onclick = () => toggleTalent(talent.id, canSelect);
+        el.talentGrid.appendChild(card);
     });
 }
 
@@ -173,7 +194,7 @@ function startGame() {
         mood: 50
     };
 
-    gameState.talents = TALENTS.filter(t => selectedTalents.includes(t.id));
+    gameState.talents = TALENTS_POOL.filter(t => selectedTalents.includes(t.id));
     gameState.talents.forEach(t => {
         if (t.effects) {
             for (const [stat, val] of Object.entries(t.effects)) {
@@ -190,7 +211,6 @@ function startGame() {
     gameState.usedEvents = new Set();
     gameState.conditionTriggered = new Set();
     gameState.achievements = [];
-    gameState.milestones = [];
     gameState.healthEverLow = false;
     gameState.wealthEverLow = false;
     gameState.isRunning = true;
@@ -220,20 +240,13 @@ function runSimulation() {
 
         gameState.age++;
 
-        // 记录属性历史
         if (gameState.stats.health < 20) gameState.healthEverLow = true;
         if (gameState.stats.wealth < 20) gameState.wealthEverLow = true;
 
-        // 被动效果：稳扎稳打
         applyPassivePerAge();
-
-        // 检查条件天赋
         checkConditionTalents();
-
-        // 检查成就
         checkAchievements();
 
-        // 检查死亡
         if (gameState.stats.health <= 0 || gameState.age > 90) {
             endGame();
             return;
@@ -305,11 +318,8 @@ function runSimulation() {
             }
         }
 
-        // 被动效果
         applyPassiveBonusPositive(modifiedEffects);
         applyPassiveReduceNegative(modifiedEffects);
-
-        // 应用效果
         applyEffects(modifiedEffects);
 
         // 中庸之道
@@ -562,7 +572,7 @@ function showScreen(name) {
 function restartGame() {
     selectedTalents = [];
     el.talentCount.textContent = '0';
-    renderTalents();
+    generateRandomTalents();
     for (const key of Object.keys(el.sliders)) {
         el.sliders[key].value = 10;
     }
@@ -571,5 +581,5 @@ function restartGame() {
 }
 
 // ============ 初始化 ============
-renderTalents();
+generateRandomTalents();
 updatePoints();

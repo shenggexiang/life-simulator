@@ -162,6 +162,25 @@ body {
     border-radius: 3px;
 }
 
+.talent-refresh-btn {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea20, #764ba220);
+    border: 2px dashed #667eea80;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.95em;
+    color: #667eea;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.talent-refresh-btn:hover {
+    background: linear-gradient(135deg, #667eea40, #764ba240);
+    border-color: #667eea;
+}
+
 .talent-category-header {
     font-size: 0.85em;
     font-weight: 600;

@@ -105,8 +105,10 @@ function getFreePointsBonus() {
 // ============ 天赋选择（随机生成10条） ============
 let selectedTalents = [];
 let currentTalentOptions = [];
+let refreshCount = 0;
 const MAX_TALENTS = 3;
 const TALENT_OPTIONS_COUNT = 10;
+const MAX_REFRESH = 3;
 
 // 随机生成10条天赋
 function generateRandomTalents() {
@@ -120,14 +122,21 @@ function generateRandomTalents() {
     renderTalents();
 }
 
+function refreshTalents() {
+    if (refreshCount >= MAX_REFRESH) return;
+    refreshCount++;
+    generateRandomTalents();
+}
+
 function renderTalents() {
     el.talentGrid.innerHTML = '';
 
     // 刷新按钮
     const refreshBtn = document.createElement('div');
-    refreshBtn.className = 'talent-refresh-btn';
-    refreshBtn.innerHTML = '🔄 换一批天赋';
-    refreshBtn.onclick = generateRandomTalents;
+    const remaining = MAX_REFRESH - refreshCount;
+    refreshBtn.className = 'talent-refresh-btn' + (remaining <= 0 ? ' disabled' : '');
+    refreshBtn.innerHTML = `🔄 换一批天赋 <span style="font-size:0.8em;opacity:0.7">(${remaining}/${MAX_REFRESH})</span>`;
+    refreshBtn.onclick = remaining > 0 ? refreshTalents : null;
     el.talentGrid.appendChild(refreshBtn);
 
     // 渲染10条随机天赋
@@ -571,6 +580,7 @@ function showScreen(name) {
 
 function restartGame() {
     selectedTalents = [];
+    refreshCount = 0;
     el.talentCount.textContent = '0';
     generateRandomTalents();
     for (const key of Object.keys(el.sliders)) {

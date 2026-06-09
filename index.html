@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人生模拟器 - Life Simulator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 开始界面 -->
+        <div id="start-screen" class="screen active">
+            <div class="title-container">
+                <h1 class="title">人生模拟器</h1>
+                <p class="subtitle">Life Simulator</p>
+                <div class="life-icon">👶→🧒→👦→👨→👴</div>
+            </div>
+
+            <div class="setup-section">
+                <h2 class="section-title">基础属性分配</h2>
+                <p class="points-info">剩余点数：<span id="remaining-points">50</span></p>
+
+                <div class="stat-sliders">
+                    <div class="stat-slider">
+                        <label>❤️ 健康</label>
+                        <input type="range" id="init-health" min="0" max="100" value="10" title="健康" oninput="updatePoints()">
+                        <span class="stat-val" id="init-health-val">10</span>
+                    </div>
+                    <div class="stat-slider">
+                        <label>🧠 智力</label>
+                        <input type="range" id="init-intelligence" min="0" max="100" value="10" title="智力" oninput="updatePoints()">
+                        <span class="stat-val" id="init-intelligence-val">10</span>
+                    </div>
+                    <div class="stat-slider">
+                        <label>✨ 魅力</label>
+                        <input type="range" id="init-charm" min="0" max="100" value="10" title="魅力" oninput="updatePoints()">
+                        <span class="stat-val" id="init-charm-val">10</span>
+                    </div>
+                    <div class="stat-slider">
+                        <label>💰 家境</label>
+                        <input type="range" id="init-wealth" min="0" max="100" value="10" title="家境" oninput="updatePoints()">
+                        <span class="stat-val" id="init-wealth-val">10</span>
+                    </div>
+                    <div class="stat-slider">
+                        <label>🍀 运气</label>
+                        <input type="range" id="init-luck" min="0" max="100" value="10" title="运气" oninput="updatePoints()">
+                        <span class="stat-val" id="init-luck-val">10</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setup-section">
+                <h2 class="section-title">选择天赋 <span class="talent-count">(<span id="talent-count">0</span>/3)</span></h2>
+                <div class="talent-grid" id="talent-grid">
+                    <!-- 天赋将由JS生成 -->
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-start" onclick="startGame()">开始新人生</button>
+        </div>
+
+        <!-- 游戏主界面 -->
+        <div id="game-screen" class="screen">
+            <!-- 状态栏 -->
+            <div class="status-bar">
+                <div class="player-info">
+                    <span class="player-age" id="display-age">0岁</span>
+                    <span class="player-phase" id="display-phase">婴儿期</span>
+                </div>
+                <div class="stats-container">
+                    <div class="stat" title="健康">
+                        <span class="stat-icon">❤️</span>
+                        <div class="stat-bar">
+                            <div class="stat-fill health" id="health-bar"></div>
+                        </div>
+                        <span class="stat-value" id="health-value">50</span>
+                    </div>
+                    <div class="stat" title="智力">
+                        <span class="stat-icon">🧠</span>
+                        <div class="stat-bar">
+                            <div class="stat-fill intelligence" id="intelligence-bar"></div>
+                        </div>
+                        <span class="stat-value" id="intelligence-value">50</span>
+                    </div>
+                    <div class="stat" title="魅力">
+                        <span class="stat-icon">✨</span>
+                        <div class="stat-bar">
+                            <div class="stat-fill charm" id="charm-bar"></div>
+                        </div>
+                        <span class="stat-value" id="charm-value">50</span>
+                    </div>
+                    <div class="stat" title="财富">
+                        <span class="stat-icon">💰</span>
+                        <div class="stat-bar">
+                            <div class="stat-fill wealth" id="wealth-bar"></div>
+                        </div>
+                        <span class="stat-value" id="wealth-value">50</span>
+                    </div>
+                    <div class="stat" title="心情">
+                        <span class="stat-icon">😊</span>
+                        <div class="stat-bar">
+                            <div class="stat-fill mood" id="mood-bar"></div>
+                        </div>
+                        <span class="stat-value" id="mood-value">50</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 事件日志 -->
+            <div class="event-log" id="event-log">
+                <div class="log-entry">
+                    <span class="log-age">0岁</span>
+                    <span class="log-icon">👶</span>
+                    <span class="log-text">你出生了！</span>
+                </div>
+            </div>
+
+            <!-- 控制按钮 -->
+            <div class="controls">
+                <button type="button" class="btn btn-speed" id="speed-btn" onclick="toggleSpeed()">⏩ 加速</button>
+                <button type="button" class="btn btn-pause" id="pause-btn" onclick="togglePause()">⏸️ 暂停</button>
+            </div>
+        </div>
+
+        <!-- 结局界面 -->
+        <div id="end-screen" class="screen">
+            <h2 class="end-title">人生结束</h2>
+            <div class="end-icon" id="end-icon">🎭</div>
+            <div class="end-summary" id="end-summary"></div>
+            <div class="end-stats" id="end-stats"></div>
+            <div class="end-talents" id="end-talents"></div>
+            <div class="end-achievements" id="end-achievements"></div>
+            <button type="button" class="btn btn-restart" onclick="restartGame()">重新开始</button>
+        </div>
+    </div>
+
+    <script src="talents.js"></script>
+    <script src="events.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

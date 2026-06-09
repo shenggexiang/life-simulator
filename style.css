@@ -1,0 +1,528 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 520px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    min-height: 600px;
+}
+
+.screen {
+    display: none;
+    padding: 30px;
+    animation: fadeIn 0.5s ease;
+}
+
+.screen.active {
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== 开始界面 ===== */
+#start-screen {
+    align-items: center;
+    background: linear-gradient(180deg, #f5f7fa 0%, #e8ecf1 100%);
+}
+
+.title-container {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.title {
+    font-size: 2.5em;
+    color: #2d3748;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    font-size: 1em;
+    color: #718096;
+    margin-bottom: 10px;
+}
+
+.life-icon {
+    font-size: 1.3em;
+    letter-spacing: 3px;
+}
+
+/* 属性分配 */
+.setup-section {
+    width: 100%;
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.section-title {
+    font-size: 1.1em;
+    color: #2d3748;
+    margin-bottom: 12px;
+}
+
+.talent-count {
+    font-size: 0.8em;
+    color: #718096;
+}
+
+.points-info {
+    text-align: right;
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+.stat-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.stat-slider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.stat-slider label {
+    min-width: 70px;
+    font-size: 0.95em;
+    color: #4a5568;
+}
+
+.stat-slider input[type="range"] {
+    flex: 1;
+    height: 8px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #e2e8f0;
+    border-radius: 4px;
+    outline: none;
+}
+
+.stat-slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+}
+
+.stat-val {
+    min-width: 30px;
+    text-align: right;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+/* 天赋选择 */
+.talent-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    max-height: 350px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.talent-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.talent-grid::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 3px;
+}
+
+.talent-category-header {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #667eea;
+    padding: 8px 0 4px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-top: 5px;
+}
+
+.talent-card {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.talent-card:hover {
+    border-color: #a0aec0;
+    transform: translateY(-1px);
+}
+
+.talent-card.selected {
+    border-color: #667eea;
+    background: #f0f4ff;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.talent-card.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.talent-icon {
+    font-size: 1.8em;
+    margin-bottom: 5px;
+}
+
+.talent-name {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 3px;
+}
+
+.talent-desc {
+    font-size: 0.72em;
+    color: #718096;
+    line-height: 1.3;
+}
+
+/* 按钮 */
+.btn {
+    padding: 14px 36px;
+    font-size: 1.05em;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 600;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.btn-start {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 1.15em;
+    padding: 16px 50px;
+    margin-top: 10px;
+}
+
+/* ===== 游戏界面 ===== */
+#game-screen {
+    background: #f7f8fc;
+    min-height: 600px;
+    padding: 20px;
+}
+
+.status-bar {
+    background: white;
+    border-radius: 15px;
+    padding: 18px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.player-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.player-age {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.player-phase {
+    font-size: 0.9em;
+    color: #718096;
+    background: #edf2f7;
+    padding: 4px 14px;
+    border-radius: 15px;
+}
+
+.stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-icon {
+    font-size: 1em;
+    width: 22px;
+    text-align: center;
+}
+
+.stat-bar {
+    flex: 1;
+    height: 16px;
+    background: #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.stat-fill {
+    height: 100%;
+    border-radius: 8px;
+    transition: width 0.4s ease;
+    width: 50%;
+}
+
+.stat-fill.health { background: linear-gradient(90deg, #fc5c7d, #e74c3c); }
+.stat-fill.intelligence { background: linear-gradient(90deg, #4facfe, #3498db); }
+.stat-fill.charm { background: linear-gradient(90deg, #f093fb, #9b59b6); }
+.stat-fill.wealth { background: linear-gradient(90deg, #43e97b, #27ae60); }
+.stat-fill.mood { background: linear-gradient(90deg, #fa709a, #f39c12); }
+
+.stat-value {
+    min-width: 30px;
+    text-align: right;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.9em;
+}
+
+/* 事件日志 */
+.event-log {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    height: 380px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.event-log::-webkit-scrollbar {
+    width: 6px;
+}
+
+.event-log::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 3px;
+}
+
+.log-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
+
+.log-age {
+    font-size: 0.8em;
+    color: #667eea;
+    background: #eef2ff;
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.log-icon {
+    font-size: 1.2em;
+}
+
+.log-text {
+    flex: 1;
+    font-size: 0.9em;
+    color: #4a5568;
+    line-height: 1.5;
+}
+
+.log-effect {
+    font-size: 0.78em;
+    color: #a0aec0;
+    margin-top: 3px;
+}
+
+.log-effect .positive { color: #38a169; }
+.log-effect .negative { color: #e53e3e; }
+
+.log-result {
+    font-size: 0.82em;
+    color: #718096;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+/* 控制按钮 */
+.controls {
+    display: flex;
+    gap: 12px;
+}
+
+.controls .btn {
+    flex: 1;
+    padding: 12px;
+    font-size: 0.95em;
+    background: white;
+    color: #4a5568;
+    border: 2px solid #e2e8f0;
+}
+
+.controls .btn:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.controls .btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+/* ===== 结局界面 ===== */
+#end-screen {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(180deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.end-title {
+    font-size: 2em;
+    color: #2d3748;
+    margin-bottom: 15px;
+}
+
+.end-icon {
+    font-size: 4.5em;
+    margin-bottom: 20px;
+}
+
+.end-summary {
+    font-size: 1.1em;
+    color: #4a5568;
+    margin-bottom: 20px;
+    line-height: 1.7;
+    max-width: 400px;
+}
+
+.end-summary h3 {
+    font-size: 1.3em;
+    color: #2d3748;
+    margin-bottom: 8px;
+}
+
+.end-stats {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    width: 85%;
+    max-width: 350px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    text-align: left;
+}
+
+.end-stats h4 {
+    margin-bottom: 12px;
+    color: #4a5568;
+    text-align: center;
+}
+
+.end-stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 0.95em;
+}
+
+.end-talents,
+.end-achievements {
+    background: white;
+    border-radius: 15px;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    width: 85%;
+    max-width: 350px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.end-talents h4,
+.end-achievements h4 {
+    margin-bottom: 10px;
+    color: #4a5568;
+    text-align: center;
+    font-size: 0.95em;
+}
+
+.talent-tag {
+    display: inline-block;
+    background: #eef2ff;
+    color: #667eea;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    margin: 3px;
+    font-weight: 500;
+}
+
+.btn-restart {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 1.1em;
+}
+
+/* 响应式 */
+@media (max-width: 480px) {
+    body { padding: 10px; }
+    .container { border-radius: 15px; }
+    .title { font-size: 2em; }
+    .screen { padding: 20px; }
+    .talent-grid { grid-template-columns: 1fr; }
+    .event-log { height: 320px; }
+}

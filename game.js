@@ -227,6 +227,7 @@ function startGame() {
     gameState.speed = 1;
 
     showScreen('game');
+    setSpeed(1);
     el.eventLog.innerHTML = '';
     addLog(0, '👶', '你出生了！', '', '');
 
@@ -360,7 +361,8 @@ function runSimulation() {
             return;
         }
 
-        const delay = gameState.speed === 2 ? 150 : 400;
+        const delays = { 1: 350, 2: 180, 3: 80 };
+        const delay = delays[gameState.speed] || 350;
         gameState.timer = setTimeout(tick, delay);
     };
 
@@ -518,15 +520,16 @@ function updateStatsDisplay() {
 }
 
 // ============ 控制 ============
-function toggleSpeed() {
-    gameState.speed = gameState.speed === 1 ? 2 : 1;
-    el.speedBtn.textContent = gameState.speed === 2 ? '⏩ 已加速' : '⏩ 加速';
-    el.speedBtn.classList.toggle('active', gameState.speed === 2);
+function setSpeed(speed) {
+    gameState.speed = speed;
+    document.getElementById('speed1-btn').classList.toggle('active', speed === 1);
+    document.getElementById('speed2-btn').classList.toggle('active', speed === 2);
+    document.getElementById('speed3-btn').classList.toggle('active', speed === 3);
 }
 
 function togglePause() {
     gameState.isPaused = !gameState.isPaused;
-    el.pauseBtn.textContent = gameState.isPaused ? '▶️ 继续' : '⏸️ 暂停';
+    el.pauseBtn.textContent = gameState.isPaused ? '▶️' : '⏸️';
     el.pauseBtn.classList.toggle('active', gameState.isPaused);
     if (!gameState.isPaused) runSimulation();
 }
@@ -588,6 +591,7 @@ function restartGame() {
     }
     updatePoints();
     showScreen('start');
+    setSpeed(1);
 }
 
 // ============ 初始化 ============

@@ -3,8 +3,9 @@ const LIFE_PHASES = [
     { name: '婴儿期', age: [0, 2], icon: '👶' },
     { name: '幼儿期', age: [3, 5], icon: '🧒' },
     { name: '童年期', age: [6, 11], icon: '🎒' },
-    { name: '青春期', age: [12, 17], icon: '🧑' },
-    { name: '青年期', age: [18, 25], icon: '👨' },
+    { name: '青春期', age: [12, 15], icon: '🧑' },
+    { name: '高中期', age: [16, 18], icon: '📚' },
+    { name: '青年期', age: [19, 25], icon: '👨' },
     { name: '壮年期', age: [26, 35], icon: '💼' },
     { name: '中年期', age: [36, 55], icon: '🏠' },
     { name: '中老年', age: [56, 65], icon: '🌴' },
@@ -105,7 +106,7 @@ const EVENTS = {
         ]}
     ],
 
-    // ===== 青春期 (12-17岁) =====
+    // ===== 青春期 (12-15岁) =====
     teenage: [
         { text: '你升入初中', icon: '📚', results: [
             { effects: { intelligence: 10 }, result: '你适应了新的学习节奏，成绩稳步提升。' },
@@ -129,6 +130,13 @@ const EVENTS = {
             { effects: { intelligence: 8 }, result: '你考上了一所普通高中。' },
             { effects: { intelligence: 5, mood: -3 }, result: '成绩不太理想，但你没有放弃。' }
         ]},
+        { text: '你开始长青春痘了', icon: '😤', results: [
+            { effects: { charm: -3, mood: -2 }, result: '你很在意形象，开始研究护肤。' }
+        ]}
+    ],
+
+    // ===== 高中期 (16-18岁) =====
+    senior_high: [
         { text: '你进入高中', icon: '🏫', results: [
             { effects: { intelligence: 8, health: -3 }, result: '高中学习压力很大，你每天学到很晚。' },
             { effects: { charm: 5, mood: 3 }, result: '你加入了学生会，认识了很多朋友。' }
@@ -141,15 +149,16 @@ const EVENTS = {
         { text: '你参加了毕业典礼', icon: '🎉', results: [
             { effects: { mood: 10, charm: 5 }, result: '你和同学们抱头痛哭，约定以后常联系。' }
         ]},
-        { text: '你开始长青春痘了', icon: '😤', results: [
-            { effects: { charm: -3, mood: -2 }, result: '你很在意形象，开始研究护肤。' }
-        ]},
         { text: '你第一次独自坐火车', icon: '🚂', results: [
             { effects: { intelligence: 3, mood: 5 }, result: '你觉得自己长大了，很独立。' }
+        ]},
+        { text: '你暗恋了隔壁班的同学', icon: '💕', results: [
+            { effects: { mood: 5 }, result: '你默默关注对方，高考后鼓起勇气表白了。' },
+            { effects: { mood: -3, intelligence: 3 }, result: '你把这份心情化为学习动力。' }
         ]}
     ],
 
-    // ===== 青年期 (18-25岁) =====
+    // ===== 青年期 (19-25岁) =====
     young_adult: [
         { text: '你进入大学', icon: '🏛️', results: [
             { effects: { charm: 10, mood: 8 }, result: '军训时你认识了一群好兄弟！' },
@@ -442,7 +451,8 @@ function getEventPool(age) {
     if (age <= 2) return EVENTS.baby;
     if (age <= 5) return EVENTS.toddler;
     if (age <= 11) return EVENTS.childhood;
-    if (age <= 17) return EVENTS.teenage;
+    if (age <= 15) return EVENTS.teenage;
+    if (age <= 18) return EVENTS.senior_high;
     if (age <= 25) return EVENTS.young_adult;
     if (age <= 35) return EVENTS.adult;
     if (age <= 55) return EVENTS.middle_age;

@@ -422,18 +422,18 @@ const ACHIEVEMENTS = [
     { id: 'age_70', name: '古稀之年', desc: '活到70岁', icon: '🏆', condition: (state) => state.age >= 70 },
     { id: 'age_80', name: '耄耋之年', desc: '活到80岁', icon: '👑', condition: (state) => state.age >= 80 },
     { id: 'age_90', name: '鲐背之年', desc: '活到90岁', icon: '🌟', condition: (state) => state.age >= 90 },
-    { id: 'health_max', name: '身强体壮', desc: '健康达到80', icon: '💪', condition: (state) => state.stats.health >= 80 },
-    { id: 'intelligence_max', name: '学富五车', desc: '智力达到80', icon: '🧠', condition: (state) => state.stats.intelligence >= 80 },
-    { id: 'charm_max', name: '万人迷', desc: '魅力达到80', icon: '✨', condition: (state) => state.stats.charm >= 80 },
-    { id: 'wealth_max', name: '富可敌国', desc: '财富达到80', icon: '💰', condition: (state) => state.stats.wealth >= 80 },
-    { id: 'mood_max', name: '幸福美满', desc: '心情达到80', icon: '😊', condition: (state) => state.stats.mood >= 80 },
+    { id: 'health_max', name: '身强体壮', desc: '健康达到100', icon: '💪', condition: (state) => state.stats.health >= 100 },
+    { id: 'intelligence_max', name: '学富五车', desc: '智力达到100', icon: '🧠', condition: (state) => state.stats.intelligence >= 100 },
+    { id: 'charm_max', name: '万人迷', desc: '魅力达到100', icon: '✨', condition: (state) => state.stats.charm >= 100 },
+    { id: 'wealth_max', name: '富可敌国', desc: '财富达到100', icon: '💰', condition: (state) => state.stats.wealth >= 100 },
+    { id: 'mood_max', name: '幸福美满', desc: '心情达到100', icon: '😊', condition: (state) => state.stats.mood >= 100 },
     { id: 'all_50', name: '全面发展', desc: '所有属性≥50', icon: '⚖️', condition: (state) => Object.values(state.stats).every(v => v >= 50) },
-    { id: 'all_65', name: '精英人才', desc: '所有属性≥65', icon: '🌟', condition: (state) => Object.values(state.stats).every(v => v >= 65) },
-    { id: 'total_250', name: '人生赢家', desc: '总属性≥250', icon: '🏆', condition: (state) => Object.values(state.stats).reduce((a, b) => a + b, 0) >= 250 },
-    { id: 'total_350', name: '传奇人生', desc: '总属性≥350', icon: '👑', condition: (state) => Object.values(state.stats).reduce((a, b) => a + b, 0) >= 350 },
-    { id: 'millionaire', name: '百万富翁', desc: '财富≥70且年龄≥40', icon: '💎', condition: (state) => state.stats.wealth >= 70 && state.age >= 40 },
-    { id: 'scholar', name: '学者', desc: '智力≥70且年龄≥30', icon: '📚', condition: (state) => state.stats.intelligence >= 70 && state.age >= 30 },
-    { id: 'socialite', name: '社交达人', desc: '魅力≥70且年龄≥25', icon: '🦋', condition: (state) => state.stats.charm >= 70 && state.age >= 25 },
+    { id: 'all_70', name: '精英人才', desc: '所有属性≥70', icon: '🌟', condition: (state) => Object.values(state.stats).every(v => v >= 70) },
+    { id: 'total_300', name: '人生赢家', desc: '总属性≥300', icon: '🏆', condition: (state) => Object.values(state.stats).reduce((a, b) => a + b, 0) >= 300 },
+    { id: 'total_400', name: '传奇人生', desc: '总属性≥400', icon: '👑', condition: (state) => Object.values(state.stats).reduce((a, b) => a + b, 0) >= 400 },
+    { id: 'millionaire', name: '百万富翁', desc: '财富≥80且年龄≥40', icon: '💎', condition: (state) => state.stats.wealth >= 80 && state.age >= 40 },
+    { id: 'scholar', name: '学者', desc: '智力≥80且年龄≥30', icon: '📚', condition: (state) => state.stats.intelligence >= 80 && state.age >= 30 },
+    { id: 'socialite', name: '社交达人', desc: '魅力≥80且年龄≥25', icon: '🦋', condition: (state) => state.stats.charm >= 80 && state.age >= 25 },
     { id: 'survivor', name: '幸存者', desc: '健康曾低于20但活过60岁', icon: '🛡️', condition: (state) => state.healthEverLow && state.age >= 60 },
     { id: 'comeback', name: '东山再起', desc: '财富曾低于20但最终≥50', icon: '🔄', condition: (state) => state.wealthEverLow && state.stats.wealth >= 50 }
 ];
@@ -470,16 +470,16 @@ function getEnding(stats, age, achievements) {
     if (age < 30) {
         return { title: '英年早逝', description: '你的生命太短暂了，还有太多事情没有完成。', icon: '🕯️', level: 1 };
     }
-    if (total > 350 && age >= 80 && achievementCount >= 5) {
+    if (total > 400 && age >= 80 && achievementCount >= 5) {
         return { title: '完美人生', description: '你的人生堪称传奇！事业有成，家庭美满，长寿安康，是真正的人生赢家。', icon: '👑', level: 6 };
     }
-    if (total > 300 && age >= 70) {
+    if (total > 350 && age >= 70) {
         return { title: '传奇人生', description: '你的人生令人羡慕！在各个领域都取得了不错的成就，安享晚年。', icon: '🌟', level: 5 };
     }
-    if (total > 250) {
+    if (total > 280) {
         return { title: '精彩人生', description: '你度过了充实的一生，有欢笑有泪水，但无怨无悔。', icon: '⭐', level: 4 };
     }
-    if (total > 180) {
+    if (total > 200) {
         return { title: '平凡人生', description: '你度过了平凡而真实的一生，虽有遗憾，但也有自己的小幸福。', icon: '🌈', level: 3 };
     }
     if (total > 100) {

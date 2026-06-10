@@ -472,7 +472,7 @@ function applyEffects(effects) {
 
 function clampStats() {
     for (const key of Object.keys(gameState.stats)) {
-        gameState.stats[key] = Math.max(0, Math.min(85, Math.round(gameState.stats[key])));
+        gameState.stats[key] = Math.max(0, Math.min(100, Math.round(gameState.stats[key])));
     }
 }
 

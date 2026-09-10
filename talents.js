@@ -320,6 +320,9 @@ const TALENTS = [
     }
 ];
 
+// 按 ID 快速查找天赋
+const TALENT_MAP = Object.fromEntries(TALENTS.map(talent => [talent.id, talent]));
+
 // 获取天赋分类名称
 function getCategoryName(category) {
     const names = {

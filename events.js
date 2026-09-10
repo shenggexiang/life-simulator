@@ -424,51 +424,51 @@ const EVENTS = {
 
 // 随机事件（随时可能发生）
 const RANDOM_EVENTS = [
-    { text: '你中了彩票小奖', icon: '🎰', chance: 0.05, results: [
+    { text: '你中了彩票小奖', icon: '🎰', chance: 0.05, good: true, results: [
         { effects: { wealth: 10, mood: 5 }, result: '意外之财！' }
     ]},
-    { text: '你生了一场病', icon: '🤒', chance: 0.08, results: [
+    { text: '你生了一场病', icon: '🤒', chance: 0.08, good: false, results: [
         { effects: { health: -8, mood: -3 }, result: '你休养了一段时间。' },
         { effects: { health: -5 }, result: '吃了药很快就好了。' }
     ]},
-    { text: '你捡到了钱', icon: '💵', chance: 0.06, results: [
+    { text: '你捡到了钱', icon: '💵', chance: 0.06, good: true, results: [
         { effects: { wealth: 3, mood: 3 }, result: '小幸运！' }
     ]},
-    { text: '你遭遇了意外', icon: '⚠️', chance: 0.04, results: [
+    { text: '你遭遇了意外', icon: '⚠️', chance: 0.04, good: false, results: [
         { effects: { health: -10, mood: -5 }, result: '你受了伤，需要休养。' },
         { effects: { health: -5 }, result: '幸好只是虚惊一场。' }
     ]},
-    { text: '你遇到了贵人', icon: '🤝', chance: 0.06, results: [
+    { text: '你遇到了贵人', icon: '🤝', chance: 0.06, good: true, results: [
         { effects: { wealth: 8, charm: 5 }, result: '对方给了你很多帮助！' }
     ]},
-    { text: '你获得了意外的荣誉', icon: '🏅', chance: 0.05, results: [
+    { text: '你获得了意外的荣誉', icon: '🏅', chance: 0.05, good: true, results: [
         { effects: { charm: 8, mood: 8 }, result: '大家都为你骄傲！' }
     ]},
-    { text: '你被偷了钱包', icon: '😿', chance: 0.04, results: [
+    { text: '你被偷了钱包', icon: '😿', chance: 0.04, good: false, results: [
         { effects: { wealth: -5, mood: -5 }, result: '你损失了一些钱。' }
     ]},
-    { text: '你中了大奖', icon: '🎊', chance: 0.02, results: [
+    { text: '你中了大奖', icon: '🎊', chance: 0.02, good: true, results: [
         { effects: { wealth: 20, mood: 10 }, result: '你一夜暴富！' }
     ]},
-    { text: '你遇到了一个好老师', icon: '👨‍🏫', chance: 0.05, results: [
+    { text: '你遇到了一个好老师', icon: '👨‍🏫', chance: 0.05, good: true, results: [
         { effects: { intelligence: 8, mood: 3 }, result: '你学到了很多！' }
     ]},
-    { text: '你被人误解了', icon: '😤', chance: 0.05, results: [
+    { text: '你被人误解了', icon: '😤', chance: 0.05, good: false, results: [
         { effects: { mood: -5, charm: -3 }, result: '你很委屈。' }
     ]},
-    { text: '你做了一个好梦', icon: '💭', chance: 0.08, results: [
+    { text: '你做了一个好梦', icon: '💭', chance: 0.08, good: true, results: [
         { effects: { mood: 3 }, result: '你心情很好。' }
     ]},
-    { text: '你吃到了美食', icon: '🍜', chance: 0.07, results: [
+    { text: '你吃到了美食', icon: '🍜', chance: 0.07, good: true, results: [
         { effects: { mood: 5, health: 2 }, result: '你很满足！' }
     ]},
-    { text: '你帮助了别人', icon: '🤝', chance: 0.06, results: [
+    { text: '你帮助了别人', icon: '🤝', chance: 0.06, good: true, results: [
         { effects: { charm: 5, mood: 5 }, result: '你感到很快乐。' }
     ]},
-    { text: '你得到了一个好消息', icon: '📰', chance: 0.05, results: [
+    { text: '你得到了一个好消息', icon: '📰', chance: 0.05, good: true, results: [
         { effects: { mood: 8 }, result: '你很开心！' }
     ]},
-    { text: '你被人骗了', icon: '😡', chance: 0.03, results: [
+    { text: '你被人骗了', icon: '😡', chance: 0.03, good: false, results: [
         { effects: { wealth: -5, mood: -5, intelligence: 3 }, result: '你吸取了教训。' }
     ]}
 ];

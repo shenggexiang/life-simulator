@@ -3,15 +3,12 @@ let gameState = {
     age: 0,
     stats: { health: 50, intelligence: 50, charm: 50, wealth: 50, mood: 50 },
     talents: [],
-    freePoints: 0,
     isRunning: false,
     isPaused: false,
     speed: 1,
     timer: null,
-    usedEvents: new Set(),
     conditionTriggered: new Set(),
     achievements: [],
-    milestones: [],
     healthEverLow: false,
     wealthEverLow: false
 };
@@ -66,8 +63,34 @@ const el = {
     endAchievements: document.getElementById('end-achievements')
 };
 
-// ============ 属性分配 ============
+// ============ 常量 ============
 const BASE_POINTS = 50;
+const BASE_STAT = 20;
+const MAX_AGE = 90;
+const STAT_ICONS = {
+    health: '❤️',
+    intelligence: '🧠',
+    charm: '✨',
+    wealth: '💰',
+    mood: '😊'
+};
+const STAT_NAMES = {
+    health: '健康',
+    intelligence: '智力',
+    charm: '魅力',
+    wealth: '财富',
+    mood: '心情'
+};
+
+function getTalent(type) {
+    return gameState.talents.find(t => t.passive?.type === type);
+}
+
+function getTalents(type) {
+    return gameState.talents.filter(t => t.passive?.type === type);
+}
+
+// ============ 属性分配 ============
 
 function updatePoints() {
     const vals = getSliderValues();
@@ -96,7 +119,7 @@ function getSliderValues() {
 function getFreePointsBonus() {
     let bonus = 0;
     selectedTalents.forEach(id => {
-        const talent = TALENTS.find(t => t.id === id);
+        const talent = TALENT_MAP[id];
         if (talent && talent.freePoints) {
             bonus += talent.freePoints;
         }
@@ -125,8 +148,11 @@ function renderTalents() {
         catTalents.forEach(talent => {
             const card = document.createElement('div');
             card.className = 'talent-card';
-            if (selectedTalents.includes(talent.id)) card.classList.add('selected');
-            const canSelect = selectedTalents.length < MAX_TALENTS || selectedTalents.includes(talent.id);
+            const isSelected = selectedTalents.includes(talent.id);
+            const canSelect = isSelected || selectedTalents.length < MAX_TALENTS;
+            if (isSelected) card.classList.add('selected');
+            if (!canSelect) card.classList.add('disabled');
+            card.setAttribute('aria-pressed', String(isSelected));
 
             card.innerHTML = `
                 <div class="talent-icon">${talent.icon}</div>
@@ -164,7 +190,7 @@ function startGame() {
         return;
     }
 
-    const base = 20;
+    const base = BASE_STAT;
     gameState.stats = {
         health: base + vals.health,
         intelligence: base + vals.intelligence,
@@ -172,8 +198,9 @@ function startGame() {
         wealth: base + vals.wealth,
         mood: 50
     };
+    gameState.luck = vals.luck;
 
-    gameState.talents = TALENTS.filter(t => selectedTalents.includes(t.id));
+    gameState.talents = selectedTalents.map(id => TALENT_MAP[id]).filter(Boolean);
     gameState.talents.forEach(t => {
         if (t.effects) {
             for (const [stat, val] of Object.entries(t.effects)) {
@@ -187,10 +214,8 @@ function startGame() {
     clampStats();
 
     gameState.age = 0;
-    gameState.usedEvents = new Set();
     gameState.conditionTriggered = new Set();
     gameState.achievements = [];
-    gameState.milestones = [];
     gameState.healthEverLow = false;
     gameState.wealthEverLow = false;
     gameState.isRunning = true;
@@ -234,26 +259,24 @@ function runSimulation() {
         checkAchievements();
 
         // 检查死亡
-        if (gameState.stats.health <= 0 || gameState.age > 90) {
+        if (gameState.stats.health <= 0 || gameState.age >= MAX_AGE) {
             endGame();
             return;
         }
 
-        const phase = getLifePhase(gameState.age);
-
         // 随机事件
+        const luckBoost = getTalent('luck_boost');
+        const luckReduce = getTalent('luck_reduce');
+        const luckFactor = 1 + (gameState.luck - 50) * 0.006;
         let randomEvent = null;
         for (const re of RANDOM_EVENTS) {
             let chance = re.chance;
-            const luckBoost = gameState.talents.find(t => t.passive?.type === 'luck_boost');
-            if (luckBoost && re.results[0]?.effects) {
-                const isGood = Object.values(re.results[0].effects).some(v => v > 0);
-                if (isGood) chance *= luckBoost.passive.factor;
-            }
-            const luckReduce = gameState.talents.find(t => t.passive?.type === 'luck_reduce');
-            if (luckReduce && re.results[0]?.effects) {
-                const isBad = Object.values(re.results[0].effects).some(v => v < 0);
-                if (isBad) chance *= (1 / luckReduce.passive.factor);
+            if (re.good) {
+                if (luckBoost) chance *= luckBoost.passive.factor;
+                chance *= luckFactor;
+            } else {
+                if (luckReduce) chance *= (1 / luckReduce.passive.factor);
+                chance *= 1 / luckFactor;
             }
 
             if (Math.random() < chance) {
@@ -275,7 +298,7 @@ function runSimulation() {
         let modifiedEffects = { ...result.effects };
 
         // 赌徒天赋
-        const randomizeTalent = gameState.talents.find(t => t.passive?.type === 'randomize');
+        const randomizeTalent = getTalent('randomize');
         if (randomizeTalent) {
             for (const k of Object.keys(modifiedEffects)) {
                 const randomFactor = 1 + (Math.random() - 0.5) * randomizeTalent.passive.factor;
@@ -284,7 +307,7 @@ function runSimulation() {
         }
 
         // 玻璃大炮
-        const glassCannon = gameState.talents.find(t => t.passive?.type === 'amplify_all');
+        const glassCannon = getTalent('amplify_all');
         if (glassCannon) {
             for (const k of Object.keys(modifiedEffects)) {
                 modifiedEffects[k] = Math.round(modifiedEffects[k] * glassCannon.passive.factor);
@@ -292,8 +315,7 @@ function runSimulation() {
         }
 
         // 大器晚成/神童
-        const ageThreshold = gameState.talents.find(t => t.passive?.type === 'age_threshold');
-        if (ageThreshold) {
+        getTalents('age_threshold').forEach(ageThreshold => {
             const isBefore = ageThreshold.passive.before;
             const meetsAge = isBefore ? gameState.age < ageThreshold.passive.age : gameState.age >= ageThreshold.passive.age;
             if (meetsAge) {
@@ -303,7 +325,7 @@ function runSimulation() {
                     }
                 }
             }
-        }
+        });
 
         // 被动效果
         applyPassiveBonusPositive(modifiedEffects);
@@ -313,7 +335,7 @@ function runSimulation() {
         applyEffects(modifiedEffects);
 
         // 中庸之道
-        const balanceTalent = gameState.talents.find(t => t.passive?.type === 'balance');
+        const balanceTalent = getTalent('balance');
         if (balanceTalent) {
             const target = balanceTalent.passive.target;
             const factor = balanceTalent.passive.factor;
@@ -336,7 +358,7 @@ function runSimulation() {
 
         el.eventLog.scrollTop = el.eventLog.scrollHeight;
 
-        if (gameState.stats.health <= 0 || gameState.age >= 85) {
+        if (gameState.stats.health <= 0 || gameState.age >= MAX_AGE) {
             setTimeout(() => endGame(), 500);
             return;
         }
@@ -350,7 +372,7 @@ function runSimulation() {
 
 // 被动效果：稳扎稳打
 function applyPassivePerAge() {
-    const talent = gameState.talents.find(t => t.passive?.type === 'per_age');
+    const talent = getTalent('per_age');
     if (talent) {
         const randomStat = talent.passive.stats[Math.floor(Math.random() * talent.passive.stats.length)];
         gameState.stats[randomStat] += talent.passive.bonus;
@@ -408,8 +430,7 @@ function checkAchievements() {
 
 // 被动：正面事件加成
 function applyPassiveBonusPositive(effects) {
-    const talents = gameState.talents.filter(t => t.passive?.type === 'bonus_positive');
-    talents.forEach(t => {
+    getTalents('bonus_positive').forEach(t => {
         if (effects[t.passive.stat] && effects[t.passive.stat] > 0) {
             effects[t.passive.stat] += t.passive.bonus;
         }
@@ -418,8 +439,7 @@ function applyPassiveBonusPositive(effects) {
 
 // 被动：负面事件减半
 function applyPassiveReduceNegative(effects) {
-    const talents = gameState.talents.filter(t => t.passive?.type === 'reduce_negative');
-    talents.forEach(t => {
+    getTalents('reduce_negative').forEach(t => {
         if (t.passive.stat === 'all') {
             for (const k of Object.keys(effects)) {
                 if (effects[k] < 0) effects[k] = Math.round(effects[k] * t.passive.factor);
@@ -439,7 +459,7 @@ function applyEffects(effects) {
     }
     clampStats();
 
-    const floorTalent = gameState.talents.find(t => t.passive?.type === 'floor');
+    const floorTalent = getTalent('floor');
     if (floorTalent) {
         for (const key of Object.keys(gameState.stats)) {
             if (gameState.stats[key] < floorTalent.passive.value) {
@@ -457,11 +477,10 @@ function clampStats() {
 
 function formatEffects(effects) {
     const parts = [];
-    const icons = { health: '❤️', intelligence: '🧠', charm: '✨', wealth: '💰', mood: '😊' };
     for (const [stat, value] of Object.entries(effects)) {
         if (value !== 0) {
             const cls = value > 0 ? 'positive' : 'negative';
-            parts.push(`<span class="${cls}">${icons[stat] || ''}${value > 0 ? '+' : ''}${value}</span>`);
+            parts.push(`<span class="${cls}">${STAT_ICONS[stat] || ''}${value > 0 ? '+' : ''}${value}</span>`);
         }
     }
     return parts.join(' ');
@@ -527,11 +546,9 @@ function endGame() {
     `;
 
     const stats = gameState.stats;
-    const icons = { health: '❤️', intelligence: '🧠', charm: '✨', wealth: '💰', mood: '😊' };
-    const names = { health: '健康', intelligence: '智力', charm: '魅力', wealth: '财富', mood: '心情' };
     el.endStats.innerHTML = `<h4>最终属性</h4>` +
         Object.keys(stats).map(k =>
-            `<div class="end-stat-row"><span>${icons[k]} ${names[k]}</span><span style="font-weight:600">${Math.round(stats[k])}</span></div>`
+            `<div class="end-stat-row"><span>${STAT_ICONS[k]} ${STAT_NAMES[k]}</span><span style="font-weight:600">${Math.round(stats[k])}</span></div>`
         ).join('');
 
     if (gameState.talents.length > 0) {

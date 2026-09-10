@@ -323,14 +323,23 @@ const TALENTS = [
 // 按 ID 快速查找天赋
 const TALENT_MAP = Object.fromEntries(TALENTS.map(talent => [talent.id, talent]));
 
+const TALENT_CATEGORIES = ['basic', 'points', 'condition', 'passive', 'special'];
+const TALENTS_BY_CATEGORY = Object.fromEntries(
+    TALENT_CATEGORIES.map(category => [
+        category,
+        TALENTS.filter(talent => talent.category === category)
+    ])
+);
+
+const CATEGORY_NAMES = {
+    basic: '基础加成',
+    points: '属性点',
+    condition: '条件触发',
+    passive: '被动效果',
+    special: '特殊天赋'
+};
+
 // 获取天赋分类名称
 function getCategoryName(category) {
-    const names = {
-        basic: '基础加成',
-        points: '属性点',
-        condition: '条件触发',
-        passive: '被动效果',
-        special: '特殊天赋'
-    };
-    return names[category] || '其他';
+    return CATEGORY_NAMES[category] || '其他';
 }

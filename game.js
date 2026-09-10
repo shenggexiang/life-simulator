@@ -3,12 +3,14 @@ let gameState = {
     age: 0,
     stats: { health: 50, intelligence: 50, charm: 50, wealth: 50, mood: 50 },
     talents: [],
+    talentIndex: {},
     isRunning: false,
     isPaused: false,
     speed: 1,
     timer: null,
     conditionTriggered: new Set(),
     achievements: [],
+    unlockedAchievementIds: new Set(),
     healthEverLow: false,
     wealthEverLow: false
 };
@@ -81,13 +83,14 @@ const STAT_NAMES = {
     wealth: '财富',
     mood: '心情'
 };
+const STAT_KEYS = Object.freeze(Object.keys(STAT_ICONS));
 
 function getTalent(type) {
-    return gameState.talents.find(t => t.passive?.type === type);
+    return gameState.talentIndex[type]?.[0];
 }
 
 function getTalents(type) {
-    return gameState.talents.filter(t => t.passive?.type === type);
+    return gameState.talentIndex[type] || [];
 }
 
 // ============ 属性分配 ============
@@ -130,52 +133,65 @@ function getFreePointsBonus() {
 // ============ 天赋选择 ============
 let selectedTalents = [];
 const MAX_TALENTS = 3;
+const talentCards = new Map();
 
 function renderTalents() {
+    talentCards.clear();
     el.talentGrid.innerHTML = '';
-    const categories = ['basic', 'points', 'condition', 'passive', 'special'];
+    const fragment = document.createDocumentFragment();
 
-    categories.forEach(cat => {
-        const catTalents = TALENTS.filter(t => t.category === cat);
+    TALENT_CATEGORIES.forEach(cat => {
+        const catTalents = TALENTS_BY_CATEGORY[cat] || [];
         if (catTalents.length === 0) return;
 
         const header = document.createElement('div');
         header.className = 'talent-category-header';
         header.textContent = getCategoryName(cat);
         header.style.gridColumn = '1 / -1';
-        el.talentGrid.appendChild(header);
+        fragment.appendChild(header);
 
         catTalents.forEach(talent => {
             const card = document.createElement('div');
             card.className = 'talent-card';
-            const isSelected = selectedTalents.includes(talent.id);
-            const canSelect = isSelected || selectedTalents.length < MAX_TALENTS;
-            if (isSelected) card.classList.add('selected');
-            if (!canSelect) card.classList.add('disabled');
-            card.setAttribute('aria-pressed', String(isSelected));
+            card.dataset.talentId = talent.id;
 
             card.innerHTML = `
                 <div class="talent-icon">${talent.icon}</div>
                 <div class="talent-name">${talent.name}</div>
                 <div class="talent-desc">${talent.desc}</div>
             `;
-            card.onclick = () => toggleTalent(talent.id, canSelect);
-            el.talentGrid.appendChild(card);
+            card.onclick = () => toggleTalent(talent.id);
+            talentCards.set(talent.id, card);
+            fragment.appendChild(card);
         });
+    });
+
+    el.talentGrid.appendChild(fragment);
+    updateTalentCards();
+}
+
+function updateTalentCards() {
+    const isFull = selectedTalents.length >= MAX_TALENTS;
+    talentCards.forEach((card, id) => {
+        const isSelected = selectedTalents.includes(id);
+        const canSelect = isSelected || !isFull;
+        card.classList.toggle('selected', isSelected);
+        card.classList.toggle('disabled', !canSelect);
+        card.setAttribute('aria-pressed', String(isSelected));
+        card.setAttribute('aria-disabled', String(!canSelect));
     });
 }
 
-function toggleTalent(id, canSelect) {
+function toggleTalent(id) {
     const idx = selectedTalents.indexOf(id);
     if (idx >= 0) {
         selectedTalents.splice(idx, 1);
     } else {
-        if (!canSelect) return;
         if (selectedTalents.length >= MAX_TALENTS) return;
         selectedTalents.push(id);
     }
     el.talentCount.textContent = selectedTalents.length;
-    renderTalents();
+    updateTalentCards();
     updatePoints();
 }
 
@@ -201,6 +217,14 @@ function startGame() {
     gameState.luck = vals.luck;
 
     gameState.talents = selectedTalents.map(id => TALENT_MAP[id]).filter(Boolean);
+    gameState.talentIndex = gameState.talents.reduce((index, talent) => {
+        const type = talent.passive?.type;
+        if (type) {
+            if (!index[type]) index[type] = [];
+            index[type].push(talent);
+        }
+        return index;
+    }, {});
     gameState.talents.forEach(t => {
         if (t.effects) {
             for (const [stat, val] of Object.entries(t.effects)) {
@@ -216,6 +240,7 @@ function startGame() {
     gameState.age = 0;
     gameState.conditionTriggered = new Set();
     gameState.achievements = [];
+    gameState.unlockedAchievementIds = new Set();
     gameState.healthEverLow = false;
     gameState.wealthEverLow = false;
     gameState.isRunning = true;
@@ -339,7 +364,7 @@ function runSimulation() {
         if (balanceTalent) {
             const target = balanceTalent.passive.target;
             const factor = balanceTalent.passive.factor;
-            for (const k of Object.keys(gameState.stats)) {
+            for (const k of STAT_KEYS) {
                 if (gameState.stats[k] > target + 10) {
                     gameState.stats[k] -= factor;
                 } else if (gameState.stats[k] < target - 10) {
@@ -389,7 +414,7 @@ function checkConditionTalents() {
         const cond = talent.condition;
 
         if (cond.type === 'all_min') {
-            triggered = Object.values(gameState.stats).every(v => v >= cond.threshold);
+            triggered = STAT_KEYS.every(key => gameState.stats[key] >= cond.threshold);
         } else if (cond.type === 'dual') {
             triggered = gameState.stats[cond.stat1] >= cond.threshold1 &&
                         gameState.stats[cond.stat2] >= cond.threshold2;
@@ -414,9 +439,10 @@ function checkConditionTalents() {
 // 检查成就
 function checkAchievements() {
     ACHIEVEMENTS.forEach(achievement => {
-        if (gameState.achievements.find(a => a.id === achievement.id)) return;
+        if (gameState.unlockedAchievementIds.has(achievement.id)) return;
 
         if (achievement.condition(gameState)) {
+            gameState.unlockedAchievementIds.add(achievement.id);
             gameState.achievements.push({
                 id: achievement.id,
                 name: achievement.name,
@@ -461,7 +487,7 @@ function applyEffects(effects) {
 
     const floorTalent = getTalent('floor');
     if (floorTalent) {
-        for (const key of Object.keys(gameState.stats)) {
+        for (const key of STAT_KEYS) {
             if (gameState.stats[key] < floorTalent.passive.value) {
                 gameState.stats[key] = floorTalent.passive.value;
             }
@@ -470,7 +496,7 @@ function applyEffects(effects) {
 }
 
 function clampStats() {
-    for (const key of Object.keys(gameState.stats)) {
+    for (const key of STAT_KEYS) {
         gameState.stats[key] = Math.max(0, Math.min(100, Math.round(gameState.stats[key])));
     }
 }
@@ -510,7 +536,7 @@ function updateDisplay() {
 
 function updateStatsDisplay() {
     const stats = gameState.stats;
-    for (const key of Object.keys(stats)) {
+    for (const key of STAT_KEYS) {
         const val = Math.round(stats[key]);
         if (el.values[key]) el.values[key].textContent = val;
         if (el.bars[key]) el.bars[key].style.width = `${val}%`;
@@ -579,7 +605,7 @@ function showScreen(name) {
 function restartGame() {
     selectedTalents = [];
     el.talentCount.textContent = '0';
-    renderTalents();
+    updateTalentCards();
     for (const key of Object.keys(el.sliders)) {
         el.sliders[key].value = 10;
     }
